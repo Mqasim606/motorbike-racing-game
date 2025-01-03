@@ -1,0 +1,94 @@
+// Variables
+let canvas = document.getElementById("gameCanvas");
+let ctx = canvas.getContext("2d");
+let bottles = [];
+let score = 0;
+let level = 1;
+let isFilling = false;
+let gameInterval, redirectInterval;
+
+// Canvas Dimensions
+canvas.width = 600;
+canvas.height = 400;
+
+// Start Game
+document.getElementById("startBtn").addEventListener("click", startGame);
+
+function startGame() {
+    resetGame();
+    generateBottles();
+    gameInterval = setInterval(updateGame, 1000 / 60); // 60 FPS
+    redirectInterval = setInterval(() => {
+        window.open("https://example.com", "_blank");
+    }, 15000); // Redirect every 15 seconds
+}
+
+// Generate Bottles
+function generateBottles() {
+    bottles = [];
+    for (let i = 0; i < 5 + level; i++) {
+        bottles.push({
+            x: Math.random() * (canvas.width - 50),
+            y: Math.random() * (canvas.height - 100),
+            filled: false
+        });
+    }
+}
+
+// Update Game
+function updateGame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBottles();
+}
+
+// Draw Bottles
+function drawBottles() {
+    bottles.forEach((bottle) => {
+        ctx.fillStyle = bottle.filled ? "#00FF00" : "#0000FF";
+        ctx.fillRect(bottle.x, bottle.y, 30, 80);
+    });
+}
+
+// Click to Fill Bottles
+canvas.addEventListener("click", (e) => {
+    let mouseX = e.offsetX;
+    let mouseY = e.offsetY;
+    bottles.forEach((bottle) => {
+        if (
+            mouseX >= bottle.x &&
+            mouseX <= bottle.x + 30 &&
+            mouseY >= bottle.y &&
+            mouseY <= bottle.y + 80 &&
+            !bottle.filled
+        ) {
+            bottle.filled = true;
+            score++;
+            updateScore();
+        }
+    });
+});
+
+// Update Score
+function updateScore() {
+    document.getElementById("score").innerText = score;
+    if (bottles.every((bottle) => bottle.filled)) {
+        level++;
+        generateBottles();
+    }
+    document.getElementById("level").innerText = level;
+}
+
+// Reset Game
+function resetGame() {
+    score = 0;
+    level = 1;
+    clearInterval(gameInterval);
+    clearInterval(redirectInterval);
+    updateScore();
+}
+
+// Customize Game
+document.getElementById("customizeBtn").addEventListener("click", () => {
+    let newName = prompt("Enter a new game name:");
+    if (newName) document.getElementById("game-name").innerText = newName;
+});
